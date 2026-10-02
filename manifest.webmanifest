@@ -3,8 +3,8 @@
   "short_name": "Chasen",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#b7d4a4",
-  "theme_color": "#b7d4a4",
+  "background_color": "#f6f3ec",
+  "theme_color": "#1d6b43",
   "lang": "zh-Hant",
   "icons": [
     {

@@ -200,23 +200,17 @@ function cluster(kind, x) {
 
 function markerHTML(cafe) {
   const both = cafe.types.includes("matcha") && cafe.types.includes("hojicha");
+  const kind = both ? "both" : (cafe.types[0] || "matcha");
   const selected = state.selected === cafe.id ? " is-selected" : "";
-  if (both) {
-    const body = `${cluster("matcha", 0)}${cluster("hojicha", 48)}`;
-    return `<div class="pin both${selected}">${svg("0 0 112 70", 84, 54, body)}</div>`;
-  }
-  return `<div class="pin${selected}">${svg("0 0 64 70", 54, 60, cluster(cafe.types[0], 0))}</div>`;
+  return `<div class="pin pin-${kind}${selected}"><span></span><em>${esc(cafe.name)}</em></div>`;
 }
 
 function svg(view, w, h, body) {
   return `<svg viewBox="${view}" width="${w}" height="${h}" aria-hidden="true">${body}</svg>`;
 }
 
-function pinSize(cafe) {
-  const both = cafe.types.includes("matcha") && cafe.types.includes("hojicha");
-  return both
-    ? { size: [84, 54], anchor: [42, 50] }
-    : { size: [54, 60], anchor: [27, 56] };
+function pinSize() {
+  return { size: [18, 18], anchor: [9, 9] };
 }
 
 function mapsUrl(cafe, apple) {
@@ -319,6 +313,13 @@ function miniKey(kind) {
   return `<i class="key key-${kind}"></i>`;
 }
 
+function showMapNote(message) {
+  const note = document.getElementById("map-note");
+  if (!note) return;
+  note.hidden = !message;
+  note.textContent = message || "";
+}
+
 function ensureMap() {
   renderFilters();
   if (mapReady) return;
@@ -328,26 +329,40 @@ function ensureMap() {
     mapReady = true;
     return;
   }
-  map = L.map(stage, { zoomControl: false, attributionControl: true }).setView([22.3, 114.17], 12);
-  const tiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    subdomains: "abcd",
+  map = L.map(stage, { zoomControl: false, attributionControl: true }).setView([22.302, 114.174], 13);
+  const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
+    attribution: "&copy; OpenStreetMap",
+  }).addTo(map);
+  const carto = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    subdomains: "abcd",
+    maxZoom: 20,
     attribution: "&copy; OpenStreetMap &copy; CARTO",
   }).addTo(map);
-  let errors = 0;
-  tiles.on("tileerror", () => {
-    errors += 1;
-    if (errors === 4) useAtlas(tr("mapFail"));
-  });
+  let loaded = false;
+  const markLoaded = () => {
+    loaded = true;
+    showMapNote("");
+  };
+  osm.on("tileload", markLoaded);
+  carto.on("tileload", markLoaded);
+  setTimeout(() => {
+    if (!loaded && state.mapMode !== "atlas") showMapNote(tr("mapFail"));
+  }, 4000);
   markerLayer = L.layerGroup().addTo(map);
-  routeLine = L.polyline([], { color: "#c4452d", weight: 3, dashArray: "6 8", opacity: 0.9 }).addTo(map);
+  routeLine = L.polyline([], { color: "#1d6b43", weight: 4, opacity: 0.85 }).addTo(map);
   userLayer = L.layerGroup().addTo(map);
   map.on("click", () => {
     if (state.sheet) closeSheet();
   });
   mapReady = true;
   updateMarkers();
-  setTimeout(() => map.invalidateSize(), 80);
+  const frame = () => {
+    map.invalidateSize();
+    fitCafes();
+  };
+  requestAnimationFrame(frame);
+  setTimeout(frame, 180);
 }
 
 function useAtlas(message) {

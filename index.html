@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#b7d4a4">
+  <meta name="theme-color" content="#1d6b43">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,7 +13,7 @@
   <link rel="icon" href="assets/icon.svg">
   <link rel="apple-touch-icon" href="assets/icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,560&family=Nunito:wght@560;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Outfit:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="css/app.css">
 </head>
@@ -34,19 +34,22 @@
       </header>
       <main>
         <section id="view-map">
-          <label class="search"><input id="map-q" type="search" enterkeyhint="search"></label>
-          <div class="filters" id="filters"></div>
-          <div id="route-banner" class="route-banner" hidden></div>
           <div class="map-stage">
             <div id="map"></div>
             <div id="atlas" class="atlas" hidden></div>
+            <div class="map-overlay">
+              <label class="search"><input id="map-q" type="search" enterkeyhint="search"></label>
+              <div class="filters" id="filters"></div>
+              <div id="route-banner" class="route-banner" hidden></div>
+            </div>
+            <p id="map-note" class="map-note" hidden></p>
             <div class="map-tools">
               <button type="button" id="zoom-in" data-act="zoom-in">+</button>
               <button type="button" id="zoom-out" data-act="zoom-out">−</button>
               <button type="button" id="fit-map" data-act="fit">Fit</button>
             </div>
+            <div class="legend" id="legend"></div>
           </div>
-          <div class="legend" id="legend"></div>
         </section>
         <section id="view-cafes" hidden></section>
         <section id="view-taste" hidden></section>
