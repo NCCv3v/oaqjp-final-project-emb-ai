@@ -42,6 +42,7 @@ const state = {
 };
 
 let map;
+let Leaflet;
 let markerLayer;
 let routeLine;
 let userLayer;
@@ -324,19 +325,29 @@ function ensureMap() {
   renderFilters();
   if (mapReady) return;
   const stage = document.getElementById("map");
-  if (!window.L) {
+  if (!window.L || typeof window.L.map !== "function") {
     useAtlas(tr("mapFail"));
     mapReady = true;
     return;
   }
-  map = L.map(stage, { zoomControl: false, attributionControl: true }).setView([22.302, 114.174], 13);
-  const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap",
-  }).addTo(map);
-  const carto = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    subdomains: "abcd",
-    maxZoom: 20,
+  Leaflet = window.L;
+  try {
+    map = Leaflet.map(stage, {
+      zoomControl: false,
+      attributionControl: true,
+      minZoom: 11,
+      maxZoom: 16,
+    }).setView([22.302, 114.174], 12);
+  } catch (err) {
+    console.error(err);
+    useAtlas(tr("mapFail"));
+    mapReady = true;
+    return;
+  }
+  const tiles = Leaflet.tileLayer("vendor/tiles/{z}/{x}/{y}.png", {
+    minZoom: 11,
+    maxZoom: 16,
+    maxNativeZoom: 13,
     attribution: "&copy; OpenStreetMap &copy; CARTO",
   }).addTo(map);
   let loaded = false;
@@ -344,14 +355,13 @@ function ensureMap() {
     loaded = true;
     showMapNote("");
   };
-  osm.on("tileload", markLoaded);
-  carto.on("tileload", markLoaded);
+  tiles.on("tileload", markLoaded);
   setTimeout(() => {
     if (!loaded && state.mapMode !== "atlas") showMapNote(tr("mapFail"));
   }, 4000);
-  markerLayer = L.layerGroup().addTo(map);
-  routeLine = L.polyline([], { color: "#1d6b43", weight: 4, opacity: 0.85 }).addTo(map);
-  userLayer = L.layerGroup().addTo(map);
+  markerLayer = Leaflet.layerGroup().addTo(map);
+  routeLine = Leaflet.polyline([], { color: "#1d6b43", weight: 4, opacity: 0.85 }).addTo(map);
+  userLayer = Leaflet.layerGroup().addTo(map);
   map.on("click", () => {
     if (state.sheet) closeSheet();
   });
@@ -385,15 +395,15 @@ function updateMarkers() {
   userLayer.clearLayers();
   for (const cafe of cafes) {
     const box = pinSize(cafe);
-    const icon = L.divIcon({
+    const icon = Leaflet.divIcon({
       className: "pin-wrap",
       html: markerHTML(cafe),
       iconSize: box.size,
       iconAnchor: box.anchor,
     });
-    const marker = L.marker([cafe.lat, cafe.lng], { icon, zIndexOffset: state.selected === cafe.id ? 800 : 0 });
+    const marker = Leaflet.marker([cafe.lat, cafe.lng], { icon, zIndexOffset: state.selected === cafe.id ? 800 : 0 });
     marker.on("click", (event) => {
-      L.DomEvent.stopPropagation(event);
+      Leaflet.DomEvent.stopPropagation(event);
       openCafe(cafe.id);
     });
     marker.addTo(markerLayer);
@@ -402,7 +412,7 @@ function updateMarkers() {
   const points = route ? route.cafes.map(cafeById).filter(Boolean).map((cafe) => [cafe.lat, cafe.lng]) : [];
   routeLine.setLatLngs(points);
   if (state.userPos) {
-    L.circleMarker([state.userPos.lat, state.userPos.lng], {
+    Leaflet.circleMarker([state.userPos.lat, state.userPos.lng], {
       radius: 7,
       color: "#c4452d",
       weight: 2,
@@ -433,7 +443,7 @@ function paintAtlas(cafes) {
 function fitCafes(list) {
   const cafes = list || visibleCafes();
   if (!cafes.length || !map || state.mapMode === "atlas") return;
-  const bounds = L.latLngBounds(cafes.map((cafe) => [cafe.lat, cafe.lng]));
+  const bounds = Leaflet.latLngBounds(cafes.map((cafe) => [cafe.lat, cafe.lng]));
   map.fitBounds(bounds.pad(0.25), { animate: true });
 }
 
