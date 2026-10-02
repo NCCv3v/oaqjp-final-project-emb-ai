@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#b7d4a4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="A Hong Kong map of matcha and hojicha cafes, tasting menus, and powder tins.">
+  <title>Chasen · Hong Kong matcha &amp; hojicha</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,560&family=Nunito:wght@560;700;800&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="studio">
+    <div class="desk" aria-hidden="true"></div>
+    <div class="phone" id="phone">
+      <header class="top">
+        <div class="brand">
+          <p class="eyebrow" id="eyebrow">Phone preview</p>
+          <h1 id="title">Chasen</h1>
+          <p class="sub" id="subtitle">Hong Kong bowls</p>
+        </div>
+        <div class="top-side">
+          <time id="clock">–:–</time>
+          <div class="langs" id="langs"></div>
+        </div>
+      </header>
+      <main>
+        <section id="view-map">
+          <label class="search"><input id="map-q" type="search" enterkeyhint="search"></label>
+          <div class="filters" id="filters"></div>
+          <div id="route-banner" class="route-banner" hidden></div>
+          <div class="map-stage">
+            <div id="map"></div>
+            <div id="atlas" class="atlas" hidden></div>
+            <div class="map-tools">
+              <button type="button" id="zoom-in" data-act="zoom-in">+</button>
+              <button type="button" id="zoom-out" data-act="zoom-out">−</button>
+              <button type="button" id="fit-map" data-act="fit">Fit</button>
+            </div>
+          </div>
+          <div class="legend" id="legend"></div>
+        </section>
+        <section id="view-cafes" hidden></section>
+        <section id="view-taste" hidden></section>
+        <section id="view-powder" hidden></section>
+        <section id="view-book" hidden></section>
+      </main>
+      <div id="sheet" class="sheet" hidden></div>
+      <nav class="tabbar" id="tabbar"></nav>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
