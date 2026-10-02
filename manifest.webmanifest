@@ -1,0 +1,17 @@
+{
+  "name": "Chasen Hong Kong",
+  "short_name": "Chasen",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#b7d4a4",
+  "theme_color": "#b7d4a4",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
