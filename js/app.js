@@ -344,11 +344,11 @@ function ensureMap() {
     mapReady = true;
     return;
   }
-  const tiles = Leaflet.tileLayer("vendor/tiles/{z}/{x}/{y}.png", {
+  const tiles = Leaflet.tileLayer("vendor/tiles/{z}/{x}/{y}.png?v=5", {
     minZoom: 11,
     maxZoom: 16,
     maxNativeZoom: 13,
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
+    attribution: "&copy; OpenStreetMap",
   }).addTo(map);
   let loaded = false;
   const markLoaded = () => {
