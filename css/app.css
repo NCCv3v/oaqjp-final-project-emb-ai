@@ -95,7 +95,7 @@ h3 { font-size: 16px; margin-top: 14px; }
 }
 .lang.on { background: var(--red); color: #fffaf3; }
 
-main { flex: 1; min-height: 0; display: flex; position: relative; }
+main { flex: 1; min-height: 0; display: flex; position: relative; z-index: 1; }
 main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
 #view-map { display: flex; flex-direction: column; overflow: hidden; background: #efe6cf; }
 #view-map[hidden], section[hidden] { display: none; }
@@ -114,7 +114,13 @@ main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
 .field { display: block; margin: 10px 0; font-weight: 800; font-size: 13px; }
 .field textarea { border-radius: 18px; min-height: 84px; }
 
-.filters { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px 4px; scrollbar-width: none; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 12px 4px; }
+#view-map .filters {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#view-map .filters::-webkit-scrollbar { display: none; }
 .filters::-webkit-scrollbar { display: none; }
 .chip, .sort {
   border: 0;
@@ -137,6 +143,7 @@ main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
   gap: 8px;
   align-items: center;
 }
+.route-banner[hidden] { display: none !important; }
 .route-banner button, .inline-link, .back, .text-link {
   border: 0;
   background: transparent;
@@ -148,6 +155,7 @@ main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
 .map-stage { position: relative; flex: 1; min-height: 180px; margin: 0 8px; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow); }
 #map, .atlas { position: absolute; inset: 0; background: #d5e7c4; }
 .leaflet-container { font-family: inherit; background: #d5e7c4; }
+.leaflet-tile-pane { filter: saturate(0.82) contrast(0.96); }
 .pin-wrap { background: transparent !important; border: none !important; }
 .pin { filter: drop-shadow(3px 4px 0 rgba(127,151,201,.45)); }
 .pin.is-selected { filter: drop-shadow(0 0 0 #d4532d) drop-shadow(0 0 6px rgba(212,83,45,.8)); }
@@ -325,16 +333,24 @@ main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
 .can .label {
   position: absolute;
   left: 7px; right: 7px; top: 30px;
-  background: rgba(255,250,240,.88);
+  background: rgba(255,250,240,.92);
   border-top: 4px solid var(--band);
   border-radius: 4px;
   padding: 4px 3px 5px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  color: #24170f;
 }
 .can .label strong { font-size: 11px; line-height: 1.15; }
-.can .label em { font-style: normal; font-size: 9px; color: var(--umber-soft); }
+.can .label em {
+  font-style: normal;
+  font-size: 9px;
+  color: var(--umber-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .can.jar { border-radius: 22px 22px 16px 16px; height: 84px; }
 .can.bag { border-radius: 3px 16px 10px 10px; }
 .can.mill { width: 78px; height: 78px; border-radius: 50%; }
@@ -376,8 +392,8 @@ main > section { flex: 1; min-height: 0; overflow: auto; width: 100%; }
   position: absolute;
   left: 8px; right: 8px;
   top: 74px;
-  bottom: 72px;
-  z-index: 30;
+  bottom: 64px;
+  z-index: 5;
   background: #fffaf3;
   border-radius: 28px 28px 18px 18px;
   box-shadow: var(--shadow);
@@ -412,6 +428,7 @@ th, td { border-bottom: 1px solid rgba(61,38,24,.12); padding: 8px 6px; vertical
 .sums p { display: flex; justify-content: space-between; font-size: 16px; }
 
 .tabbar {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 2px;

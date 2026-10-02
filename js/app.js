@@ -1,5 +1,5 @@
 import { CAFES, POWDERS, CRAWLS, GLOSSARY, BREW, METHOD, SOURCES } from "./data.js";
-import { L, t } from "./i18n.js";
+import { L as translate, t } from "./i18n.js";
 import {
   filterCafes,
   filterPowders,
@@ -66,7 +66,7 @@ function tr(key) {
 }
 
 function tx(value) {
-  return L(lang(), value);
+  return translate(lang(), value);
 }
 
 function load() {
@@ -323,31 +323,41 @@ function ensureMap() {
   renderFilters();
   if (mapReady) return;
   const stage = document.getElementById("map");
-  if (!window.L) {
+  const Leaflet = window.L;
+  if (!Leaflet || typeof Leaflet.map !== "function") {
     useAtlas(tr("mapFail"));
     mapReady = true;
     return;
   }
-  map = L.map(stage, { zoomControl: false, attributionControl: true }).setView([22.3, 114.17], 12);
-  const tiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    subdomains: "abcd",
+  try {
+  map = Leaflet.map(stage, { zoomControl: false, attributionControl: true }).setView([22.3, 114.17], 12);
+  const tiles = Leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: "&copy; OpenStreetMap &copy; CARTO",
+    attribution: "&copy; OpenStreetMap",
   }).addTo(map);
   let errors = 0;
   tiles.on("tileerror", () => {
     errors += 1;
-    if (errors === 4) useAtlas(tr("mapFail"));
+    if (errors === 6) useAtlas(tr("mapFail"));
   });
-  markerLayer = L.layerGroup().addTo(map);
-  routeLine = L.polyline([], { color: "#c4452d", weight: 3, dashArray: "6 8", opacity: 0.9 }).addTo(map);
-  userLayer = L.layerGroup().addTo(map);
+  markerLayer = Leaflet.layerGroup().addTo(map);
+  routeLine = Leaflet.polyline([], { color: "#c4452d", weight: 3, dashArray: "6 8", opacity: 0.9 }).addTo(map);
+  userLayer = Leaflet.layerGroup().addTo(map);
   map.on("click", () => {
     if (state.sheet) closeSheet();
   });
   mapReady = true;
   updateMarkers();
-  setTimeout(() => map.invalidateSize(), 80);
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize();
+      fitCafes();
+    }
+  }, 120);
+  } catch {
+    useAtlas(tr("mapFail"));
+    mapReady = true;
+  }
 }
 
 function useAtlas(message) {
@@ -370,15 +380,15 @@ function updateMarkers() {
   userLayer.clearLayers();
   for (const cafe of cafes) {
     const box = pinSize(cafe);
-    const icon = L.divIcon({
+    const icon = window.L.divIcon({
       className: "pin-wrap",
       html: markerHTML(cafe),
       iconSize: box.size,
       iconAnchor: box.anchor,
     });
-    const marker = L.marker([cafe.lat, cafe.lng], { icon, zIndexOffset: state.selected === cafe.id ? 800 : 0 });
+    const marker = window.L.marker([cafe.lat, cafe.lng], { icon, zIndexOffset: state.selected === cafe.id ? 800 : 0 });
     marker.on("click", (event) => {
-      L.DomEvent.stopPropagation(event);
+      window.L.DomEvent.stopPropagation(event);
       openCafe(cafe.id);
     });
     marker.addTo(markerLayer);
@@ -387,7 +397,7 @@ function updateMarkers() {
   const points = route ? route.cafes.map(cafeById).filter(Boolean).map((cafe) => [cafe.lat, cafe.lng]) : [];
   routeLine.setLatLngs(points);
   if (state.userPos) {
-    L.circleMarker([state.userPos.lat, state.userPos.lng], {
+    window.L.circleMarker([state.userPos.lat, state.userPos.lng], {
       radius: 7,
       color: "#c4452d",
       weight: 2,
@@ -418,7 +428,7 @@ function paintAtlas(cafes) {
 function fitCafes(list) {
   const cafes = list || visibleCafes();
   if (!cafes.length || !map || state.mapMode === "atlas") return;
-  const bounds = L.latLngBounds(cafes.map((cafe) => [cafe.lat, cafe.lng]));
+  const bounds = window.L.latLngBounds(cafes.map((cafe) => [cafe.lat, cafe.lng]));
   map.fitBounds(bounds.pad(0.25), { animate: true });
 }
 
@@ -538,7 +548,7 @@ function renderPowders() {
       <label class="search light"><input id="powder-q" value="${esc(state.powderQuery)}" placeholder="${esc(tr("searchPowders"))}"></label>
       <div class="sorts">${sorts}</div>
       <div class="filters powder-filters">
-        ${chip("powder-type", "all", tr("allAreas"), state.powderType === "all")}
+        ${chip("powder-type", "all", tr("allTeas"), state.powderType === "all")}
         ${chip("powder-type", "matcha", tr("matcha"), state.powderType === "matcha")}
         ${chip("powder-type", "hojicha", tr("hojicha"), state.powderType === "hojicha")}
       </div>
@@ -1024,6 +1034,18 @@ function refreshLists() {
 }
 
 function boot() {
+  if (!window.L || typeof window.L.map !== "function") {
+    if (document.readyState === "complete") {
+      start();
+      return;
+    }
+    window.addEventListener("load", start, { once: true });
+    return;
+  }
+  start();
+}
+
+function start() {
   load();
   paintChrome();
   document.getElementById("map-q").addEventListener("input", (event) => {
